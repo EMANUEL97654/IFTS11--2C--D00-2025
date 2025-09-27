@@ -12,7 +12,7 @@ class Peluqueria:
         for turno in self.turnos:
             if turno.fecha == fecha and turno.hora == hora:
                 return turno
-        return None
+        return "No se encontro el turno"
 
     def eliminar_turno(self, turno):
         self.turnos.remove(turno)
