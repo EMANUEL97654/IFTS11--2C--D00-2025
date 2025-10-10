@@ -1,7 +1,8 @@
 import uuid
+import json
 from datetime import datetime, timedelta
 
-class Cliente:
+class Cliente(object):
     def __init__(self, nombre, telefono, email=""):
         self.id = uuid.uuid4() 
         self.nombre = nombre
@@ -11,7 +12,7 @@ class Cliente:
     def __str__(self):
         return f"Cliente: {self.nombre} (Tel: {self.telefono})"
 
-class Servicio:
+class Servicio(object):
     def __init__(self, nombre, duracion_minutos: int, precio: float):
         self.id = uuid.uuid4() 
         if duracion_minutos <= 0:
@@ -23,7 +24,7 @@ class Servicio:
     def __str__(self):
         return f"Servicio: {self.nombre} ({self.duracion_minutos} min, ${self.precio})"
 
-class Barbero:
+class Barbero(object):
     def __init__(self, nombre: str, especialidad: str):
         self.id = uuid.uuid4() 
         self.nombre = nombre
@@ -32,7 +33,7 @@ class Barbero:
     def __str__(self):
         return f"Barbero: {self.nombre} ({self.especialidad})"
 
-class Turno:
+class Turno(object):
     def __init__(self, dt_inicio: datetime, cliente: Cliente, servicio: Servicio, barbero: Barbero):
         self.id = uuid.uuid4() 
         self.dt_inicio = dt_inicio
@@ -51,7 +52,7 @@ class Turno:
         return (f"Turno ID: {self.id.hex[:6]} | {fecha_str} de {hora_inicio_str} a {hora_fin_str} | "
                 f"{self.cliente.nombre} | Serv: {self.servicio.nombre} | Barb: {self.barbero.nombre}")
 
-class Peluqueria:
+class Peluqueria(object):
     def __init__(self, nombre, direccion, telefono, horario_apertura: str = "09:00", horario_cierre: str = "18:00"):
         self.nombre = nombre
         self.direccion = direccion
@@ -137,6 +138,23 @@ class Peluqueria:
         for turno in self.turnos:
             print(turno)
 
+def csv2Json(objeto):
+    """Convierte un objeto (por ejemplo peluquería o lista de turnos) en JSON."""
+    def serializar(o):
+        if isinstance(o, (Cliente, Servicio, Barbero, Turno)):
+            return o.__dict__
+        elif isinstance(o, datetime):
+            return o.isoformat()
+        elif isinstance(o, uuid.UUID):
+            return str(o)
+        else:
+            raise TypeError(f"No se puede serializar el tipo {type(o)}")
+
+    try:
+        return json.dumps(objeto, default=serializar, indent=4, ensure_ascii=False)
+    except Exception as e:
+        print(f"Error al convertir a JSON: {e}")
+
 
 print("--- Inicialización ---")
 peluqueria = Peluqueria("The Clipper's Den", "Av. Siempre Viva 123", "123456789", 
@@ -196,3 +214,6 @@ else:
 
 print("\n--- Listado después de eliminación ---")
 peluqueria.listar_turnos()
+
+json_turnos = csv2Json(peluqueria.turnos)
+print(json_turnos)
